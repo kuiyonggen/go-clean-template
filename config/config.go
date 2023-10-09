@@ -47,7 +47,7 @@ type (
 )
 
 // NewConfig returns app config.
-func NewConfig(cfgFile string) (*Config, error) {
+func NewConfig() (*Config, error) {
 	// config args, priority: config > consul
 	var (
 		configFile   = flag.String("config", "", "config file, prior to use.")
@@ -57,9 +57,6 @@ func NewConfig(cfgFile string) (*Config, error) {
 		listenAddr   = flag.String("listen", ":8080", "listen address.")
 	)
 	flag.Parse()
-	if len(cfgFile) == 0 {
-		cfgFile = "./config/config.yml"
-	}
 
 	cfg := &Config{}
 
@@ -69,7 +66,7 @@ func NewConfig(cfgFile string) (*Config, error) {
 		cfg.Version = "v0.0.1"
 		cfg.Port = *listenAddr
 	} else {
-		err := cleanenv.ReadConfig(cfgFile, cfg)
+		err := cleanenv.ReadConfig(*configFile, cfg)
 		if err != nil {
 			return nil, fmt.Errorf("config error: %w", err)
 		}
