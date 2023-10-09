@@ -47,10 +47,14 @@ type (
 )
 
 // NewConfig returns app config.
-func NewConfig() (*Config, error) {
-	cfg := &Config{}
+func NewConfig(cfgFile string) (*Config, error) {
+        if len(cfgFile) == 0 {
+            cfgFile = "./config/config.yml"
+        }
 
-	err := cleanenv.ReadConfig("./config/config.yml", cfg)
+        cfg := &Config{}
+
+	err := cleanenv.ReadConfig(cfgFile, cfg)
 	if err != nil {
 		return nil, fmt.Errorf("config error: %w", err)
 	}
