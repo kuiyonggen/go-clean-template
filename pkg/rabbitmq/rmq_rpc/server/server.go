@@ -49,6 +49,10 @@ func New(url, serverExchange string, router map[string]CallHandler, l logger.Int
 		logger:  l,
 	}
 
+        if len(url) == 0 {
+            return s, nil
+        }
+
 	// Custom options
 	for _, opt := range opts {
 		opt(s)
@@ -139,12 +143,17 @@ func (s *Server) reconnect() {
 
 // Notify -.
 func (s *Server) Notify() <-chan error {
-	return s.error
+        return s.error
 }
 
 // Shutdown -.
 func (s *Server) Shutdown() error {
-	select {
+        if len(s.conn.URL) == 0 {
+            close(s.error)
+            return nil
+        }   
+
+        select {
 	case <-s.error:
 		return nil
 	default:

@@ -25,6 +25,14 @@ import (
 func Run(cfg *config.Config) {
 	l := logger.New(cfg.Log.Level)
 
+        // Register Service
+        serviceID, err := cfg.CClient.Register(cfg.HTTP.Address, cfg.HTTP.Port, cfg.CheckApi, 
+                cfg.Interval, cfg.Timeout, cfg.Tags)
+        if err != nil {
+            l.Fatal(fmt.Errorf("app - Run - consul register: %w.", err))
+        }
+        defer cfg.CClient.Deregister(serviceID)
+
 	// Repository
 	pg, err := postgres.New(cfg.PG.URL, postgres.MaxPoolSize(cfg.PG.PoolMax))
 	if err != nil {
@@ -39,11 +47,11 @@ func Run(cfg *config.Config) {
 	)
 
 	// RabbitMQ RPC Server
-	rmqRouter := amqprpc.NewRouter(translationUseCase)
+        rmqRouter := amqprpc.NewRouter(translationUseCase)
 
-	rmqServer, err := server.New(cfg.RMQ.URL, cfg.RMQ.ServerExchange, rmqRouter, l)
+        rmqServer, err := server.New(cfg.RMQ.URL, cfg.RMQ.ServerExchange, rmqRouter, l)
 	if err != nil {
-		l.Fatal(fmt.Errorf("app - Run - rmqServer - server.New: %w", err))
+	    l.Fatal(fmt.Errorf("app - Run - rmqServer - server.New: %w", err))
 	}
 
 	// HTTP Server
