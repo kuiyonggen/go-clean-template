@@ -7,7 +7,7 @@ import (
 	"github.com/kuiyonggen/go-clean-template/internal/app"
 )
 
-func main() {
+func Main() {
 	// Configuration
 	cfg, err := config.NewConfig()
 	if err != nil {
@@ -16,4 +16,8 @@ func main() {
 
 	// Run
 	app.Run(cfg)
+}
+
+func main() {
+    Main()
 }
