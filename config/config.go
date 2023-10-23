@@ -6,6 +6,8 @@ import (
         "strings"
 	"github.com/ilyakaznacheev/cleanenv"
         "github.com/kuiyonggen/go-clean-template/pkg/consul"    
+        "github.com/kuiyonggen/go-clean-template/pkg/postgres"
+        "github.com/kuiyonggen/go-clean-template/pkg/logger"
         "github.com/kuiyonggen/go-clean-template/utils"
     )
 
@@ -13,13 +15,16 @@ type (
 	// Config -.
 	Config struct {
 		App  `yaml:"app"`
+                Log    `yaml:"log"`
 		HTTP `yaml:"http"`
                 Consul `yaml:"consul"`
-		Log  `yaml:"logger"`
 		PG   `yaml:"postgres"`
 		RMQ  `yaml:"rabbitmq"`
+                Extra map[string]interface{} `yaml:"extra"`
 
                 CClient *consul.Consul
+                Pg *postgres.Postgres
+                Logger *logger.Logger
 	}
 
 	// App -.
@@ -34,11 +39,10 @@ type (
 		Port string `env-required:"true" yaml:"port" env:"HTTP_PORT"`
 	}
 
-	// Log -.
-	Log struct {
-		Level string `env-required:"true" yaml:"log_level"   env:"LOG_LEVEL"`
-	}
-
+        // Log -.
+        Log struct {
+                Level string `env-required:"true" yaml:"log_level"   env:"LOG_LEVEL"`
+        }
 
         // Consul -.
         Consul struct {

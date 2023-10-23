@@ -12,8 +12,10 @@ import (
 	// Swagger docs.
 	_ "github.com/kuiyonggen/go-clean-template/docs"
 	"github.com/kuiyonggen/go-clean-template/internal/usecase"
-	"github.com/kuiyonggen/go-clean-template/pkg/logger"
-)
+	"github.com/kuiyonggen/go-clean-template/internal/usecase/repo"
+	"github.com/kuiyonggen/go-clean-template/internal/usecase/webapi"
+        "github.com/kuiyonggen/go-clean-template/config"
+    )
 
 // NewRouter -.
 // Swagger spec:
@@ -22,7 +24,7 @@ import (
 // @version     1.0
 // @host        localhost:8080
 // @BasePath    /v1
-func NewRouter(handler *gin.Engine, l logger.Interface, t usecase.Translation) {
+func NewRouter(handler *gin.Engine, cfg *config.Config) {
 	// Options
 	handler.Use(gin.Logger())
 	handler.Use(gin.Recovery())
@@ -40,6 +42,11 @@ func NewRouter(handler *gin.Engine, l logger.Interface, t usecase.Translation) {
 	// Routers
 	h := handler.Group("/v1")
 	{
-		newTranslationRoutes(h, t, l)
+            // Use case
+            t := usecase.New(
+                repo.New(cfg.Pg),
+                webapi.New(),
+            )
+	    newTranslationRoutes(h, t, cfg.Logger)
 	}
 }

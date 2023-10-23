@@ -12,9 +12,6 @@ import (
 	"github.com/kuiyonggen/go-clean-template/config"
 	amqprpc "github.com/kuiyonggen/go-clean-template/internal/controller/amqp_rpc"
 	v1 "github.com/kuiyonggen/go-clean-template/internal/controller/http/v1"
-	"github.com/kuiyonggen/go-clean-template/internal/usecase"
-	"github.com/kuiyonggen/go-clean-template/internal/usecase/repo"
-	"github.com/kuiyonggen/go-clean-template/internal/usecase/webapi"
 	"github.com/kuiyonggen/go-clean-template/pkg/httpserver"
 	"github.com/kuiyonggen/go-clean-template/pkg/logger"
 	"github.com/kuiyonggen/go-clean-template/pkg/postgres"
@@ -24,6 +21,7 @@ import (
 // Run creates objects via constructors.
 func Run(cfg *config.Config) {
 	l := logger.New(cfg.Log.Level)
+        cfg.Logger = l
 
         // Register Service
         serviceID, err := cfg.CClient.Register(cfg.HTTP.Address, cfg.HTTP.Port, cfg.CheckApi, 
@@ -40,14 +38,10 @@ func Run(cfg *config.Config) {
 	}
 	defer pg.Close()
 
-	// Use case
-	translationUseCase := usecase.New(
-		repo.New(pg),
-		webapi.New(),
-	)
+        cfg.Pg = pg
 
 	// RabbitMQ RPC Server
-        rmqRouter := amqprpc.NewRouter(translationUseCase)
+        rmqRouter := amqprpc.NewRouter(cfg)
 
         rmqServer, err := server.New(cfg.RMQ.URL, cfg.RMQ.ServerExchange, rmqRouter, l)
 	if err != nil {
@@ -56,7 +50,7 @@ func Run(cfg *config.Config) {
 
 	// HTTP Server
 	handler := gin.New()
-	v1.NewRouter(handler, l, translationUseCase)
+	v1.NewRouter(handler, cfg)
 	httpServer := httpserver.New(handler, httpserver.Port(cfg.HTTP.Port))
 
 	// Waiting signal
