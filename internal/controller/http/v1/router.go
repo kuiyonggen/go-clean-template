@@ -2,6 +2,7 @@
 package v1
 
 import (
+        "fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -10,29 +11,28 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 
 	// Swagger docs.
-	_ "github.com/kuiyonggen/go-clean-template/docs"
-	"github.com/kuiyonggen/go-clean-template/internal/usecase"
-	"github.com/kuiyonggen/go-clean-template/internal/usecase/repo"
-	"github.com/kuiyonggen/go-clean-template/internal/usecase/webapi"
+	"github.com/kuiyonggen/go-clean-template/docs"
         "github.com/kuiyonggen/go-clean-template/config"
     )
 
-// NewRouter -.
-// Swagger spec:
-// @title       Go Clean Template API
-// @description Using a translation service as an example
-// @version     1.0
-// @host        localhost:8080
-// @BasePath    /v1
+// NewRouter _.
 func NewRouter(handler *gin.Engine, cfg *config.Config) {
-	// Options
+        basePath := "/v1"
+        // Options
 	handler.Use(gin.Logger())
 	handler.Use(gin.Recovery())
 
 	// Swagger
-	swaggerHandler := ginSwagger.DisablingWrapHandler(swaggerFiles.Handler, "DISABLE_SWAGGER_HTTP_HANDLER")
-	handler.GET("/swagger/*any", swaggerHandler)
-
+        // programmatically set swagger info
+        if cfg.Swagger {
+            docs.SwaggerInfo.Title = fmt.Sprintf("%s Service API", cfg.Name)
+            docs.SwaggerInfo.Description = fmt.Sprintf("%s Service.", cfg.Name)
+            docs.SwaggerInfo.Version = cfg.Version
+            docs.SwaggerInfo.Host = fmt.Sprintf("%s:%s", cfg.Address, cfg.Port)
+            docs.SwaggerInfo.BasePath = basePath
+	    swaggerHandler := ginSwagger.DisablingWrapHandler(swaggerFiles.Handler, "DISABLE_SWAGGER_HTTP_HANDLER")
+	    handler.GET("/swagger/*any", swaggerHandler)
+        }
 	// K8s probe
 	handler.GET("/healthz", func(c *gin.Context) { c.Status(http.StatusOK) })
 
@@ -40,13 +40,9 @@ func NewRouter(handler *gin.Engine, cfg *config.Config) {
 	handler.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
 	// Routers
-	h := handler.Group("/v1")
+	h := handler.Group(basePath)
 	{
-            // Use case
-            t := usecase.New(
-                repo.New(cfg.Pg),
-                webapi.New(),
-            )
-	    newTranslationRoutes(h, t, cfg.Logger)
+	    newTranslationRoutes(h, cfg)
+            newHelloRoutes(h, cfg)
 	}
 }

@@ -24,38 +24,34 @@ func newHelloRoutes(handler *gin.RouterGroup, cfg *config.Config) {
 	}
 }
 
-type sayResponse struct {
-	Hello string `string:"hello"`
-}
-
-// @Summary     Show hello
-// @Description Show hello
-// @ID          echo
-// @Tags  	    hello
-// @Accept      json
-// @Produce     json
-// @Success     200 {object} sayResponse
-// @Failure     500 {object} response
-// @Router      /hello/say [get]
+// @Summary      Show hello
+// @Description  Show hello
+// @ID           echo
+// @Tags               hello
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  response
+// @Failure      500  {object}  response
+// @Router       /hello/say [get]
 func (r *helloRoutes) say(c *gin.Context) {
-	c.JSON(http.StatusOK, sayResponse{"Hello"})
+	c.JSON(http.StatusOK, "Hello, Alice@!@")
 }
 
 type greetingRequest struct {
 	Name      string `json:"name"       binding:"required"  example:"alice"`
 }
 
-// @Summary     Greeting
-// @Description Greeting
-// @ID          greeting
-// @Tags  	    hello
-// @Accept      json
-// @Produce     json
-// @Param       request body greetingRequest
-// @Success     200 {object} response
-// @Failure     400 {object} response
-// @Failure     500 {object} response
-// @Router      /hello/greeting [post]
+// @Summary      Greeting
+// @Description  Greeting
+// @ID           greeting
+// @Tags               hello
+// @Accept       json
+// @Produce      json
+// @Param        request  body      greetingRequest  true  "greeting"
+// @Success      200      {object}  response
+// @Failure      400      {object}  response
+// @Failure      500      {object}  response
+// @Router       /hello/greeting [post]
 func (r *helloRoutes) greeting(c *gin.Context) {
 	var request greetingRequest
 	if err := c.ShouldBindJSON(&request); err != nil {

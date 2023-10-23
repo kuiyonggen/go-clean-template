@@ -23,6 +23,83 @@ var doc = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/hello/greeting": {
+            "post": {
+                "description": "Greeting",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "hello"
+                ],
+                "summary": "Greeting",
+                "operationId": "greeting",
+                "parameters": [
+                    {
+                        "description": "greeting",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_controller_http_v1.greetingRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_controller_http_v1.response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_controller_http_v1.response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_controller_http_v1.response"
+                        }
+                    }
+                }
+            }
+        },
+        "/hello/say": {
+            "get": {
+                "description": "Show hello",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "hello"
+                ],
+                "summary": "Show hello",
+                "operationId": "echo",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_controller_http_v1.response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_controller_http_v1.response"
+                        }
+                    }
+                }
+            }
+        },
         "/translation/do-translate": {
             "post": {
                 "description": "Translate a text",
@@ -44,7 +121,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/v1.doTranslateRequest"
+                            "$ref": "#/definitions/internal_controller_http_v1.doTranslateRequest"
                         }
                     }
                 ],
@@ -58,13 +135,13 @@ var doc = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/v1.response"
+                            "$ref": "#/definitions/internal_controller_http_v1.response"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/v1.response"
+                            "$ref": "#/definitions/internal_controller_http_v1.response"
                         }
                     }
                 }
@@ -88,13 +165,13 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/v1.historyResponse"
+                            "$ref": "#/definitions/internal_controller_http_v1.historyResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/v1.response"
+                            "$ref": "#/definitions/internal_controller_http_v1.response"
                         }
                     }
                 }
@@ -123,7 +200,7 @@ var doc = `{
                 }
             }
         },
-        "v1.doTranslateRequest": {
+        "github.com_kuiyonggen_go-clean-template_internal_controller_http_v1.doTranslateRequest": {
             "type": "object",
             "required": [
                 "destination",
@@ -145,7 +222,19 @@ var doc = `{
                 }
             }
         },
-        "v1.historyResponse": {
+        "github.com_kuiyonggen_go-clean-template_internal_controller_http_v1.greetingRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "example": "alice"
+                }
+            }
+        },
+        "github.com_kuiyonggen_go-clean-template_internal_controller_http_v1.historyResponse": {
             "type": "object",
             "properties": {
                 "history": {
@@ -156,7 +245,61 @@ var doc = `{
                 }
             }
         },
-        "v1.response": {
+        "github.com_kuiyonggen_go-clean-template_internal_controller_http_v1.response": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "message"
+                }
+            }
+        },
+        "internal_controller_http_v1.doTranslateRequest": {
+            "type": "object",
+            "required": [
+                "destination",
+                "original",
+                "source"
+            ],
+            "properties": {
+                "destination": {
+                    "type": "string",
+                    "example": "en"
+                },
+                "original": {
+                    "type": "string",
+                    "example": "текст для перевода"
+                },
+                "source": {
+                    "type": "string",
+                    "example": "auto"
+                }
+            }
+        },
+        "internal_controller_http_v1.greetingRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "example": "alice"
+                }
+            }
+        },
+        "internal_controller_http_v1.historyResponse": {
+            "type": "object",
+            "properties": {
+                "history": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.Translation"
+                    }
+                }
+            }
+        },
+        "internal_controller_http_v1.response": {
             "type": "object",
             "properties": {
                 "error": {
@@ -179,12 +322,12 @@ type swaggerInfo struct {
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = swaggerInfo{
-	Version:     "1.0",
-	Host:        "localhost:8080",
-	BasePath:    "/v1",
+	Version:     "",
+	Host:        "",
+	BasePath:    "",
 	Schemes:     []string{},
-	Title:       "Go Clean Template API",
-	Description: "Using a translation service as an example",
+	Title:       "",
+	Description: "",
 }
 
 type s struct{}
@@ -219,5 +362,5 @@ func (s *s) ReadDoc() string {
 }
 
 func init() {
-	swag.Register(swag.Name, &s{})
+	swag.Register("swagger", &s{})
 }

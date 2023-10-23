@@ -25,7 +25,7 @@ func Run(cfg *config.Config) {
 
         // Register Service
         serviceID, err := cfg.CClient.Register(cfg.HTTP.Address, cfg.HTTP.Port, cfg.CheckApi, 
-                cfg.Interval, cfg.Timeout, cfg.Tags)
+                cfg.Interval, cfg.Timeout, cfg.Tags, cfg.Swagger)
         if err != nil {
             l.Fatal(fmt.Errorf("app - Run - consul register: %w.", err))
         }

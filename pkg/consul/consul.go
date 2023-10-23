@@ -75,12 +75,18 @@ func (c *Consul) Kv(cfg interface{}) error {
 
 // Register -.
 func (c *Consul) Register(listenAddress, listenPort, checkApi, interval, timeout string, 
-        tags []string) (string, error) {
+        tags []string, swagger bool) (string, error) {
     check := api.AgentServiceCheck{
         HTTP: fmt.Sprintf("http://%s:%s%s", listenAddress, listenPort, checkApi),
         Interval: interval,
         Timeout: timeout,
         Notes: "Consul check service health status.",
+    }
+
+    meta := make(map[string]string)
+    if swagger {
+        meta["swagger"] = fmt.Sprintf("http://%s:%s/swagger/index.html", 
+                listenAddress, listenPort)
     }
 
     intPort, _ := strconv.Atoi(listenPort)
@@ -89,9 +95,7 @@ func (c *Consul) Register(listenAddress, listenPort, checkApi, interval, timeout
                 listenAddress, listenPort),
         Name: c.Service,
         Tags: tags,
-        Meta: map[string]string{
-            "swagger": fmt.Sprintf("http://%s:%s/swagger/index.html", 
-                listenAddress, listenPort)},
+        Meta: meta,
         Address: listenAddress,
         Port: intPort,
         Check: &check,

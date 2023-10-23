@@ -7,7 +7,10 @@ import (
 
 	"github.com/kuiyonggen/go-clean-template/internal/entity"
 	"github.com/kuiyonggen/go-clean-template/internal/usecase"
+	"github.com/kuiyonggen/go-clean-template/internal/usecase/repo"
+	"github.com/kuiyonggen/go-clean-template/internal/usecase/webapi"
 	"github.com/kuiyonggen/go-clean-template/pkg/logger"
+        "github.com/kuiyonggen/go-clean-template/config"
 )
 
 type translationRoutes struct {
@@ -15,8 +18,13 @@ type translationRoutes struct {
 	l logger.Interface
 }
 
-func newTranslationRoutes(handler *gin.RouterGroup, t usecase.Translation, l logger.Interface) {
-	r := &translationRoutes{t, l}
+func newTranslationRoutes(handler *gin.RouterGroup, cfg *config.Config) {
+        // Use case
+        t := usecase.New(
+            repo.New(cfg.Pg),
+            webapi.New(),
+        )
+        r := &translationRoutes{t, cfg.Logger}
 
 	h := handler.Group("/translation")
 	{
@@ -29,15 +37,15 @@ type historyResponse struct {
 	History []entity.Translation `json:"history"`
 }
 
-// @Summary     Show history
-// @Description Show all translation history
-// @ID          history
-// @Tags  	    translation
-// @Accept      json
-// @Produce     json
-// @Success     200 {object} historyResponse
-// @Failure     500 {object} response
-// @Router      /translation/history [get]
+// @Summary      Show history
+// @Description  Show all translation history
+// @ID           history
+// @Tags               translation
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  historyResponse
+// @Failure      500  {object}  response
+// @Router       /translation/history [get]
 func (r *translationRoutes) history(c *gin.Context) {
 	translations, err := r.t.History(c.Request.Context())
 	if err != nil {
@@ -56,17 +64,17 @@ type doTranslateRequest struct {
 	Original    string `json:"original"     binding:"required"  example:"текст для перевода"`
 }
 
-// @Summary     Translate
-// @Description Translate a text
-// @ID          do-translate
-// @Tags  	    translation
-// @Accept      json
-// @Produce     json
-// @Param       request body doTranslateRequest true "Set up translation"
-// @Success     200 {object} entity.Translation
-// @Failure     400 {object} response
-// @Failure     500 {object} response
-// @Router      /translation/do-translate [post]
+// @Summary      Translate
+// @Description  Translate a text
+// @ID           do-translate
+// @Tags               translation
+// @Accept       json
+// @Produce      json
+// @Param        request  body      doTranslateRequest  true  "Set up translation"
+// @Success      200      {object}  entity.Translation
+// @Failure      400      {object}  response
+// @Failure      500      {object}  response
+// @Router       /translation/do-translate [post]
 func (r *translationRoutes) doTranslate(c *gin.Context) {
 	var request doTranslateRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
