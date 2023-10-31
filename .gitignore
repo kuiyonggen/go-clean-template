@@ -1,3 +1,4 @@
+migrations/bindata.go
 go-clean-template
 # IDE
 .idea

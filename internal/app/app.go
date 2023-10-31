@@ -20,6 +20,9 @@ import (
 
 // Run creates objects via constructors.
 func Run(cfg *config.Config) {
+        // migrate
+        initMig(cfg)
+
 	l := logger.New(cfg.Log.Level)
         cfg.Logger = l
 

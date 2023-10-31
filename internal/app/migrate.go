@@ -1,17 +1,16 @@
-//go:build migrate
-
 package app
 
 import (
 	"errors"
 	"log"
-	"os"
 	"time"
 
 	"github.com/golang-migrate/migrate/v4"
 	// migrate tools
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
-	_ "github.com/golang-migrate/migrate/v4/source/file"
+        "github.com/kuiyonggen/go-clean-template/config"
+        "github.com/kuiyonggen/go-clean-template/migrations"
+        "github.com/golang-migrate/migrate/v4/source/go_bindata"
 )
 
 const (
@@ -19,13 +18,8 @@ const (
 	_defaultTimeout  = time.Second
 )
 
-func init() {
-	databaseURL, ok := os.LookupEnv("PG_URL")
-	if !ok || len(databaseURL) == 0 {
-		log.Fatalf("migrate: environment variable not declared: PG_URL")
-	}
-
-	databaseURL += "?sslmode=disable"
+func initMig(cfg *config.Config) {
+        databaseURL := cfg.PG.URL + "?sslmode=disable"
 
 	var (
 		attempts = _defaultAttempts
@@ -33,9 +27,21 @@ func init() {
 		m        *migrate.Migrate
 	)
 
+        // wrap assets into Resource
+        s := bindata.Resource(migrations.AssetNames(),
+        func(name string) ([]byte, error) {
+            return migrations.Asset(name)
+        })
+
+        d, err := bindata.WithInstance(s)
+        if err != nil {
+            log.Fatalf("failed create bindata instance, err: %s.", err)
+            return
+        }
+
 	for attempts > 0 {
-		m, err = migrate.New("file://migrations", databaseURL)
-		if err == nil {
+                m, err = migrate.NewWithSourceInstance("go-bindata", d, databaseURL)
+                if err == nil {
 			break
 		}
 
